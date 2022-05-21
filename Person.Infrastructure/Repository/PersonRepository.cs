@@ -1,106 +1,123 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Person.Domain.PersonAggregate;
+using Person.Domain.PersonAggregate.DTO;
 using Person.Domain.SeedWork;
-using System.Linq.Expressions;
 
 namespace Person.Infrastructure.Repository
 {
-    public class PersonRepository : GenericGetQuery<PersonEntity>, IPersonRepository
+    public class PersonRepository : GenericRepositoryConfig<PersonEntity>, IPersonRepository
     {
-        private readonly PersonContext _context;
+        private readonly IMapper _mapper;
 
-        public IUnitOfWork UnitOfWork => _context;
-
-        public PersonRepository(PersonContext context)
+        public PersonRepository(PersonContext context, IMapper mapper) : base(context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _mapper = mapper;
         }
 
-        #region Get Genérico IQueryable
-        private async Task<IQueryable<TEntity>> Get<TEntity>(
-            Expression<Func<TEntity, bool>>? filter = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-            string includeProperties = ""
-        ) where TEntity : Entity
+        private IQueryable<PersonEntity> PersonByIdQuery(int id)
         {
-            IQueryable<TEntity> query = _context.Set<TEntity>();
+            return _entities.Where(person => person.PersonId == id);
+        }
 
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
+        public async Task<PersonEntityDto> GetPersonById(int id)
+        {
+            var person = await PersonByIdQuery(id)
+                .Include(incl => incl.Location)
+                .ThenInclude(tinc => tinc!.Coordinates)
+                .Include(inc => inc.Location)
+                .ThenInclude(tinc => tinc!.Timezone)
+                .Include(incl => incl.Login)
+                .Include(incl => incl.Picture)
+                .Include(incl => incl.Registered)
+                .FirstOrDefaultAsync();
 
+            return person != null
+              ? _mapper.Map<PersonEntityDto>(person)
+              : throw new EntityNotFoundException("La entidad no se encontró.");
+        }
+
+        public async Task<LocationDto> GetPersonLocation(int personId)
+        {
+            var location = await PersonByIdQuery(personId)
+                .Include(incl => incl.Location)
+                .ThenInclude(tinc => tinc!.Coordinates)
+                .Include(inc => inc.Location)
+                .ThenInclude(tinc => tinc!.Timezone)
+                .Select(sel => sel.Location)
+                .FirstOrDefaultAsync();
+
+            return location != null
+              ? _mapper.Map<LocationDto>(location)
+              : throw new EntityNotFoundException("La entidad no se encontró.");
+        }
+
+        public async Task<RegisteredDto> GetPersonRegistered(int personId)
+        {
+            var registered = await PersonByIdQuery(personId)
+                .Include(incl => incl.Registered)
+                .Select(sel => sel.Registered)
+                .FirstOrDefaultAsync();
+
+            return registered != null
+              ? _mapper.Map<RegisteredDto>(registered)
+              : throw new EntityNotFoundException("La entidad no se encontró.");
+        }
+
+        public async Task<LoginDto> GetPersonLogin(int personId)
+        {
+            var loginInfo = await PersonByIdQuery(personId)
+                .Include(incl => incl.Login)
+                .Select(sel => sel.Login)
+                .FirstOrDefaultAsync();
+
+            return loginInfo != null
+              ? _mapper.Map<LoginDto>(loginInfo)
+              : throw new EntityNotFoundException("La entidad no se encontró.");
+        }
+
+        public async Task<PictureDto> GetPersonPicture(int personId)
+        {
+            var pictures = await PersonByIdQuery(personId)
+                .Include(incl => incl.Picture)
+                .Select(sel => sel.Picture)
+                .FirstOrDefaultAsync();
+
+            return pictures != null
+              ? _mapper.Map<PictureDto>(pictures)
+              : throw new EntityNotFoundException("La entidad no se encontró.");
+        }
+
+        public async Task<int> AddPerson(PersonEntityDto personDto)
+        {
+            var person = _mapper.Map<PersonEntity>(personDto);
+
+            await _entities.AddAsync(person);
+            await UnitOfWork.SaveChangesAsync();
+
+            return person.PersonId;
+        }
+
+        public async Task DeletePerson(int id)
+        {
+            var person =
+                await PersonByIdQuery(id).FirstOrDefaultAsync()
+                ?? throw new EntityNotFoundException(
+                    "La entidad no se pudo eliminar debido a que no se ha encontrado."
+                );
+
+            _entities.Remove(person);
+
+            await UnitOfWork.SaveChangesAsync();
+        }
+
+        public async Task UpdatePerson(PersonEntityDto personDto)
+        {
             await Task.Run(
                 () =>
                 {
-                    foreach (
-                        var includeProperty in includeProperties.Split(
-                            new char[] { ',', ';', '\u0020' },
-                            StringSplitOptions.RemoveEmptyEntries
-                        )
-                    )
-                    {
-                        query = query.Include(includeProperty);
-                    }
-                }
-            );
-
-            return orderBy is null ? query : orderBy(query);
-        }
-        #endregion
-
-        public async Task<IEnumerable<PersonEntity>> GetAll(
-            Expression<Func<PersonEntity, bool>>? filter = null,
-            Func<IQueryable<PersonEntity>, IOrderedQueryable<PersonEntity>>? orderBy = null,
-            string includeProperties = ""
-        )
-        {
-            return await (await Get(filter, orderBy, includeProperties)).ToListAsync();
-        }
-
-        public async Task<IEnumerable<TResult>> GetAll<TResult>(
-            Expression<Func<PersonEntity, bool>>? filter = null,
-            Func<IQueryable<PersonEntity>, IOrderedQueryable<PersonEntity>>? orderBy = null,
-            Expression<Func<PersonEntity, TResult>>? selector = null,
-            string includeProperties = ""
-        )
-        {
-            return await (await Get(filter, orderBy, includeProperties))
-                .Select(selector ?? throw new ArgumentNullException(nameof(selector)))
-                .ToListAsync();
-        }
-
-        public async Task<PersonEntity> FindById(int id, string includeProperties = "")
-        {
-            return (
-                await Get<PersonEntity>(
-                    person => person.PersonId == id,
-                    includeProperties: includeProperties
-                )
-            ).FirstOrDefault()!;
-        }
-
-        public async Task Add(PersonEntity person)
-        {
-            await _context.BasicData.AddAsync(person);
-        }
-
-        public async Task Delete(int id)
-        {
-            _context.BasicData.Remove(
-                await FindById(id)
-                    ?? throw new EntityNotFoundException(
-                        "La entidad no se pudo eliminar debido a que no se ha encontrado."
-                    )
-            );
-        }
-
-        public async Task Update(PersonEntity person)
-        {
-            await Task.Run(
-                () =>
-                {
-                    _context.BasicData.Attach(person);
+                    var person = _mapper.Map<PersonEntity>(personDto);
+                    _entities.Attach(person);
                     _context.Entry(person).State = EntityState.Modified;
                 }
             );

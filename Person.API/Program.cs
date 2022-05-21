@@ -17,6 +17,8 @@ builder.Services.AddDbContext<PersonContext>(option =>
     option.UseNpgsql("Server=127.0.0.1;Port=5432;Database=PersonDBGenerator;User Id=postgres;Password=8523;");
 }, ServiceLifetime.Scoped);
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
 var app = builder.Build();
