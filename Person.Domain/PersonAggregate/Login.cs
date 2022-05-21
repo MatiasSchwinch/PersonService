@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Person.Domain.PersonAggregate
+﻿namespace Person.Domain.PersonAggregate
 {
     public partial class Login
     {
@@ -13,7 +10,6 @@ namespace Person.Domain.PersonAggregate
         public string? Md5 { get; set; }
         public string? Sha1 { get; set; }
         public string? Sha256 { get; set; }
-
         public virtual PersonEntity? BasicDatum { get; set; }
     }
 }

@@ -4,7 +4,8 @@ namespace Person.Domain.PersonAggregate.DTO
 {
     public class TimezoneDto
     {
-        //public int TimezoneId { get; set; }
+        [Required]
+        public int TimezoneId { get; set; }
         [MaxLength(6)]
         public string? Offset { get; set; }
         [MaxLength(120)]

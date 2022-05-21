@@ -4,7 +4,8 @@ namespace Person.Domain.PersonAggregate.DTO
 {
     public class LocationDto
     {
-        //public int LocationId { get; set; }
+        [Required]
+        public int LocationId { get; set; }
         public int StreetNumber { get; set; }
         [MaxLength(90)]
         public string? StreetName { get; set; }

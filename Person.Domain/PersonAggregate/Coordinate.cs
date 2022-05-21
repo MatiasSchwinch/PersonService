@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Person.Domain.PersonAggregate
+﻿namespace Person.Domain.PersonAggregate
 {
     public partial class Coordinate
     {

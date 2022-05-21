@@ -4,7 +4,8 @@ namespace Person.Domain.PersonAggregate.DTO
 {
     public class LoginDto
     {
-        //public int LoginId { get; set; }
+        [Required]
+        public int LoginId { get; set; }
         [MaxLength(36)]
         public string? Uuid { get; set; }
         [MaxLength(25)]

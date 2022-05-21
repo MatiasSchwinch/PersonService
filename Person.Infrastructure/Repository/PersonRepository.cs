@@ -37,6 +37,15 @@ namespace Person.Infrastructure.Repository
               : throw new EntityNotFoundException("La entidad no se encontró.");
         }
 
+        public async Task<BasicDataDto> GetPersonBasicData(int personId)
+        {
+            var person = await PersonByIdQuery(personId).FirstOrDefaultAsync();
+
+            return person != null
+              ? _mapper.Map<BasicDataDto>(person)
+              : throw new EntityNotFoundException("La entidad no se encontró.");
+        }
+
         public async Task<LocationDto> GetPersonLocation(int personId)
         {
             var location = await PersonByIdQuery(personId)
@@ -111,16 +120,15 @@ namespace Person.Infrastructure.Repository
             await UnitOfWork.SaveChangesAsync();
         }
 
-        public async Task UpdatePerson(PersonEntityDto personDto)
+        public async Task<int> UpdatePerson(PersonEntityDto personDto)
         {
-            await Task.Run(
-                () =>
-                {
-                    var person = _mapper.Map<PersonEntity>(personDto);
-                    _entities.Attach(person);
-                    _context.Entry(person).State = EntityState.Modified;
-                }
-            );
+            var person = _mapper.Map<PersonEntity>(personDto);
+            _entities.Attach(person);
+            _context.Entry(person).State = EntityState.Modified;
+
+            await UnitOfWork.SaveChangesAsync();
+
+            return person.PersonId;
         }
 
         #region Implementación IDisposable

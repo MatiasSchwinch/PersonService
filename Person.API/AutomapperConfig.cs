@@ -27,6 +27,8 @@ namespace Person.API
             //        from => from.MapFrom(sel => sel.Registered)
             //    );
 
+            CreateMap<PersonEntity, BasicDataDto>().ReverseMap();
+
             CreateMap<Coordinate, CoordinateDto>().ReverseMap();
             CreateMap<Location, LocationDto>().ReverseMap();
             CreateMap<Login, LoginDto>().ReverseMap();

@@ -1,4 +1,4 @@
-﻿#nullable disable
+﻿//#nullable disable
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Person.Domain.PersonAggregate;
@@ -34,16 +34,24 @@ namespace Person.API.Controllers
         {
             try
             {
-                _stopwatch.Start();
                 var person = await _repository.GetPersonById(id);
-                _stopwatch.Stop();
-
-                _logger.LogInformation(
-                    "Query ejecutada en: {0} ms",
-                    _stopwatch.ElapsedMilliseconds
-                );
 
                 return Ok(person);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+            }
+        }
+
+        [HttpGet("{id:int}/BasicData")]
+        public async Task<ActionResult<BasicDataDto>> GetPersonBasicData(int id)
+        {
+            try
+            {
+                var personLocation = await _repository.GetPersonBasicData(id);
+
+                return Ok(personLocation);
             }
             catch (Exception ex)
             {
@@ -56,14 +64,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                _stopwatch.Start();
                 var personLocation = await _repository.GetPersonLocation(id);
-                _stopwatch.Stop();
-
-                _logger.LogInformation(
-                    "Query ejecutada en: {0} ms",
-                    _stopwatch.ElapsedMilliseconds
-                );
 
                 return Ok(personLocation);
             }
@@ -140,13 +141,34 @@ namespace Person.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<PersonEntityDto>> PostPerson([FromBody] PersonEntityDto person)
+        public async Task<ActionResult<PersonEntityDto>> PostPerson(
+            [FromBody] PersonEntityDto person
+        )
         {
             try
             {
                 var id = await _repository.AddPerson(person);
 
-                return Ok($"El registro fue añadido correctamente a la base de datos con el id: {id}.");
+                return Ok(
+                    $"El registro fue añadido correctamente a la base de datos y se le asigno el id nro: {id}."
+                );
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+            }
+        }
+
+        [HttpPut]
+        public async Task<ActionResult<PersonEntityDto>> PutPerson(
+            [FromBody] PersonEntityDto person
+        )
+        {
+            try
+            {
+                var id = await _repository.UpdatePerson(person);
+
+                return Ok($"El registro con id: {id} fue actualizado correctamente.");
             }
             catch (Exception ex)
             {
@@ -161,7 +183,11 @@ namespace Person.API.Controllers
             {
                 await _repository.DeletePerson(id);
 
-                return Ok(new ResponseSuccess($"La entidad con 'id: {id}' se elimino correctamente de la base de datos."));
+                return Ok(
+                    new ResponseSuccess(
+                        $"La entidad con 'id: {id}' se elimino correctamente de la base de datos."
+                    )
+                );
             }
             catch (Exception ex)
             {

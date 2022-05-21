@@ -4,7 +4,8 @@ namespace Person.Domain.PersonAggregate.DTO
 {
     public class PersonEntityDto
     {
-        //public int PersonId { get; set; }
+        [Required]
+        public int PersonId { get; set; }
         [MaxLength(20)]
         public string? Title { get; set; }
         [Required]
@@ -15,7 +16,7 @@ namespace Person.Domain.PersonAggregate.DTO
         public string LastName { get; set; } = null!;
         public short Gender { get; set; }
         [Required]
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public int Age { get; set; }
         [Required]
         [MaxLength(320)]
