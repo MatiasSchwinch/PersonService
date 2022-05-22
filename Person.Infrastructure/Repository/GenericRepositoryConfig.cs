@@ -58,13 +58,5 @@ namespace Person.Infrastructure.Repository
                 selector ?? throw new ArgumentNullException(nameof(selector))
             );
         }
-
-        //public IQueryable<T> Get<T>(Expression<Func<T, bool>>? filter = null) where T : Entity
-        //{
-        //    var query = _context.Set<T>();
-        //    if (filter != null)
-        //        query.Where(filter);
-        //    return query;
-        //}
     }
 }

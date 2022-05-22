@@ -1,10 +1,7 @@
-﻿//#nullable disable
-using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Person.Domain.PersonAggregate;
 using Person.Domain.PersonAggregate.DTO;
 using Person.Domain.SeedWork;
-using System.Diagnostics;
 
 namespace Person.API.Controllers
 {
@@ -14,21 +11,18 @@ namespace Person.API.Controllers
     {
         private readonly ILogger<PersonController> _logger;
         private readonly IPersonRepository _repository;
-        private readonly IMapper _mapper;
-        private readonly Stopwatch _stopwatch;
 
-        public PersonController(
-            ILogger<PersonController> logger,
-            IPersonRepository repository,
-            IMapper mapper
-        )
+        public PersonController(ILogger<PersonController> logger, IPersonRepository repository)
         {
             _logger = logger;
             _repository = repository;
-            _mapper = mapper;
-            _stopwatch = new Stopwatch();
         }
 
+        /// <summary>
+        /// Retorna el registro completo de una persona realizando la búsqueda mediante su Id.
+        /// </summary>
+        /// <param name="id">(int) Numero de Id del registro</param>
+        /// <returns></returns>
         [HttpGet("{id:int}")]
         public async Task<ActionResult<PersonEntityDto>> GetPerson(int id)
         {
@@ -40,10 +34,23 @@ namespace Person.API.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "GetPerson Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
 
+        /// <summary>
+        /// Retorna solo la información básica de una persona realizando la búsqueda mediante su Id.
+        /// </summary>
+        /// <param name="id">(int) Numero de Id del registro</param>
+        /// <returns></returns>
         [HttpGet("{id:int}/BasicData")]
         public async Task<ActionResult<BasicDataDto>> GetPersonBasicData(int id)
         {
@@ -55,10 +62,23 @@ namespace Person.API.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "GetPersonBasicData Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
 
+        /// <summary>
+        /// Retorna solo la información de la ubicación de una persona realizando la búsqueda mediante su Id.
+        /// </summary>
+        /// <param name="id">(int) Numero de Id del registro</param>
+        /// <returns></returns>
         [HttpGet("{id:int}/Location")]
         public async Task<ActionResult<LocationDto>> GetPersonLocation(int id)
         {
@@ -70,76 +90,107 @@ namespace Person.API.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "GetPersonLocation Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
 
+        /// <summary>
+        /// Retorna solo la información del registro de una persona realizando la búsqueda mediante su Id.
+        /// </summary>
+        /// <param name="id">(int) Numero de Id del registro</param>
+        /// <returns></returns>
         [HttpGet("{id:int}/Registered")]
         public async Task<ActionResult<RegisteredDto>> GetPersonRegistered(int id)
         {
             try
             {
-                _stopwatch.Start();
                 var personRegistered = await _repository.GetPersonRegistered(id);
-                _stopwatch.Stop();
-
-                _logger.LogInformation(
-                    "Query ejecutada en: {0} ms",
-                    _stopwatch.ElapsedMilliseconds
-                );
 
                 return Ok(personRegistered);
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "GetPersonRegistered Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
 
+        /// <summary>
+        /// Retorna solo la información de credenciales de una persona realizando la búsqueda mediante su Id.
+        /// </summary>
+        /// <param name="id">(int) Numero de Id del registro</param>
+        /// <returns></returns>
         [HttpGet("{id:int}/Login")]
         public async Task<ActionResult<LoginDto>> GetPersonLogin(int id)
         {
             try
             {
-                _stopwatch.Start();
                 var personLogin = await _repository.GetPersonRegistered(id);
-                _stopwatch.Stop();
-
-                _logger.LogInformation(
-                    "Query ejecutada en: {0} ms",
-                    _stopwatch.ElapsedMilliseconds
-                );
 
                 return Ok(personLogin);
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "GetPersonLogin Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
 
+        /// <summary>
+        /// Retorna solo las imágenes de una persona realizando la búsqueda mediante su Id.
+        /// </summary>
+        /// <param name="id">(int) Numero de Id del registro</param>
+        /// <returns></returns>
         [HttpGet("{id:int}/Picture")]
         public async Task<ActionResult<PictureDto>> GetPersonPicture(int id)
         {
             try
             {
-                _stopwatch.Start();
                 var personPicture = await _repository.GetPersonPicture(id);
-                _stopwatch.Stop();
-
-                _logger.LogInformation(
-                    "Query ejecutada en: {0} ms",
-                    _stopwatch.ElapsedMilliseconds
-                );
 
                 return Ok(personPicture);
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "GetPersonPicture Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
 
+        /// <summary>
+        /// Añade un nuevo registro completo a la base de datos.
+        /// </summary>
+        /// <param name="person">(PersonEntityDto) Entidad que se va a guardar en la base de datos.</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<PersonEntityDto>> PostPerson(
             [FromBody] PersonEntityDto person
@@ -155,10 +206,23 @@ namespace Person.API.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "PostPerson Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
 
+        /// <summary>
+        /// Edita un registro existente en la base de datos.
+        /// </summary>
+        /// <param name="person">(PersonEntityDto) Entidad que se va a editar en la base de datos.</param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<ActionResult<PersonEntityDto>> PutPerson(
             [FromBody] PersonEntityDto person
@@ -168,14 +232,27 @@ namespace Person.API.Controllers
             {
                 var id = await _repository.UpdatePerson(person);
 
-                return Ok($"El registro con id: {id} fue actualizado correctamente.");
+                return Ok($"El registro con 'id: {id}' fue actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "PutPerson Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
 
+        /// <summary>
+        /// Elimina un registro de la base de datos.
+        /// </summary>
+        /// <param name="id">Numero de id del registro a eliminar.</param>
+        /// <returns></returns>
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeletePerson(int id)
         {
@@ -191,7 +268,15 @@ namespace Person.API.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new ResponseException(ex.Message, ex.GetType().ToString()));
+                _logger.LogError(ex, "DeletePerson Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
             }
         }
     }
