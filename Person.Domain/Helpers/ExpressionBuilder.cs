@@ -39,6 +39,7 @@ namespace Person.Domain.Helpers
 
                 //Establece el valor que posteriormente va a ser utilizado en la expresión lambda. EJ: "30"
                 //TODO: Verificar si es necesario convertir el valor a tipo de dato de la propiedad (REFACTORIZAR.)
+                //TODO: Produce una excepción cuando el valor es un numero, pero no un int32.
                 var condition = _operadores[expression.@operator](
                     property,
                     Expression.Constant(
@@ -61,6 +62,7 @@ namespace Person.Domain.Helpers
             return expressions.Select(str => str.Replace("filter=", "")).ToArray();
         }
 
+        //TODO: Solo funciona con operadores simples y de un carácter (ARREGLAR.).
         private static Queue<(string property, string @operator, string value)> ToTuple(
             string[] expressions
         )

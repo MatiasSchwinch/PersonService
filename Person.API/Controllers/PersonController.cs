@@ -19,18 +19,20 @@ namespace Person.API.Controllers
         }
 
         /// <summary>
-        /// Retorna todos los registros de la base de datos.
+        /// Retorna todos los registros que cumplan con los filtros especificados.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="filters">Filtros que se deben cumplir (tiene limitaciones, buscar en la clase ExpressionBuilder).</param>
+        /// <returns>Lista de entidades que cumplieron con los filtros especificados.</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PersonEntityDto>>> GetAll([FromQuery] string[]? filters = null)
+        public async Task<ActionResult<IEnumerable<BasicDataDto>>> GetAll(
+            [FromQuery] string[] filters
+        )
         {
             try
             {
+                var persons = await _repository.GetAllAsync(filters);
 
-
-                await Task.Delay(1);
-                return Ok(filters);
+                return Ok(new { CantidadRegistros = persons.Count(), Resultados = persons });
             }
             catch (Exception ex)
             {

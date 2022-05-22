@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Person.Domain.Helpers;
 using Person.Domain.PersonAggregate;
 using Person.Domain.PersonAggregate.DTO;
 using Person.Domain.SeedWork;
-using System.Linq.Expressions;
 
 namespace Person.Infrastructure.Repository
 {
@@ -21,9 +21,20 @@ namespace Person.Infrastructure.Repository
             return _entities.Where(person => person.PersonId == id);
         }
 
-        public async Task<IEnumerable<PersonEntityDto>> GetAllAsync(Expression<Func<PersonEntity, bool>>? filter = null)
+        public async Task<IEnumerable<BasicDataDto>> GetAllAsync(string[] filters)
         {
-            return _mapper.Map<IEnumerable<PersonEntityDto>>(await (await Get(filter)).ToListAsync());
+            if (!filters.Any())
+            {
+                throw new ArgumentNullException(nameof(filters), "El parámetro no puede ser nulo");
+            }
+
+            var queryBuilder = new ExpressionBuilder<PersonEntity>(filters).Build();
+
+            var persons = await Get(queryBuilder);
+
+            return persons != null && persons.Any()
+              ? _mapper.Map<IEnumerable<BasicDataDto>>(await persons.ToListAsync())
+              : throw new EntityNotFoundException("No se encontró ninguna entidad que cumpla con los filtros establecidos.");
         }
 
         public async Task<PersonEntityDto> GetPersonByIdAsync(int id)
