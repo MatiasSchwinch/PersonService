@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Person.Domain.PersonAggregate;
 using Person.Domain.PersonAggregate.DTO;
 using Person.Domain.SeedWork;
+using System.Linq.Expressions;
 
 namespace Person.Infrastructure.Repository
 {
@@ -20,7 +21,12 @@ namespace Person.Infrastructure.Repository
             return _entities.Where(person => person.PersonId == id);
         }
 
-        public async Task<PersonEntityDto> GetPersonById(int id)
+        public async Task<IEnumerable<PersonEntityDto>> GetAllAsync(Expression<Func<PersonEntity, bool>>? filter = null)
+        {
+            return _mapper.Map<IEnumerable<PersonEntityDto>>(await (await Get(filter)).ToListAsync());
+        }
+
+        public async Task<PersonEntityDto> GetPersonByIdAsync(int id)
         {
             var person = await PersonByIdQuery(id)
                 .Include(incl => incl.Location)
@@ -37,7 +43,7 @@ namespace Person.Infrastructure.Repository
               : throw new EntityNotFoundException("La entidad no se encontró.");
         }
 
-        public async Task<BasicDataDto> GetPersonBasicData(int personId)
+        public async Task<BasicDataDto> GetPersonBasicDataAsync(int personId)
         {
             var person = await PersonByIdQuery(personId).FirstOrDefaultAsync();
 
@@ -46,7 +52,7 @@ namespace Person.Infrastructure.Repository
               : throw new EntityNotFoundException("La entidad no se encontró.");
         }
 
-        public async Task<LocationDto> GetPersonLocation(int personId)
+        public async Task<LocationDto> GetPersonLocationAsync(int personId)
         {
             var location = await PersonByIdQuery(personId)
                 .Include(incl => incl.Location)
@@ -61,7 +67,7 @@ namespace Person.Infrastructure.Repository
               : throw new EntityNotFoundException("La entidad no se encontró.");
         }
 
-        public async Task<RegisteredDto> GetPersonRegistered(int personId)
+        public async Task<RegisteredDto> GetPersonRegisteredAsync(int personId)
         {
             var registered = await PersonByIdQuery(personId)
                 .Include(incl => incl.Registered)
@@ -73,7 +79,7 @@ namespace Person.Infrastructure.Repository
               : throw new EntityNotFoundException("La entidad no se encontró.");
         }
 
-        public async Task<LoginDto> GetPersonLogin(int personId)
+        public async Task<LoginDto> GetPersonLoginAsync(int personId)
         {
             var loginInfo = await PersonByIdQuery(personId)
                 .Include(incl => incl.Login)
@@ -85,7 +91,7 @@ namespace Person.Infrastructure.Repository
               : throw new EntityNotFoundException("La entidad no se encontró.");
         }
 
-        public async Task<PictureDto> GetPersonPicture(int personId)
+        public async Task<PictureDto> GetPersonPictureAsync(int personId)
         {
             var pictures = await PersonByIdQuery(personId)
                 .Include(incl => incl.Picture)
@@ -97,7 +103,7 @@ namespace Person.Infrastructure.Repository
               : throw new EntityNotFoundException("La entidad no se encontró.");
         }
 
-        public async Task<int> AddPerson(PersonEntityDto personDto)
+        public async Task<int> AddPersonAsync(PersonEntityDto personDto)
         {
             var person = _mapper.Map<PersonEntity>(personDto);
 
@@ -107,7 +113,7 @@ namespace Person.Infrastructure.Repository
             return person.PersonId;
         }
 
-        public async Task DeletePerson(int id)
+        public async Task DeletePersonAsync(int id)
         {
             var person =
                 await PersonByIdQuery(id).FirstOrDefaultAsync()
@@ -120,7 +126,7 @@ namespace Person.Infrastructure.Repository
             await UnitOfWork.SaveChangesAsync();
         }
 
-        public async Task<int> UpdatePerson(PersonEntityDto personDto)
+        public async Task<int> UpdatePersonAsync(PersonEntityDto personDto)
         {
             var person = _mapper.Map<PersonEntity>(personDto);
             _entities.Attach(person);

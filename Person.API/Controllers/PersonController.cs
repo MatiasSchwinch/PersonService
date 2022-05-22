@@ -19,6 +19,34 @@ namespace Person.API.Controllers
         }
 
         /// <summary>
+        /// Retorna todos los registros de la base de datos.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PersonEntityDto>>> GetAll([FromQuery] string[]? filters = null)
+        {
+            try
+            {
+
+
+                await Task.Delay(1);
+                return Ok(filters);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAll Method");
+                return NotFound(
+                    new ResponseException(
+                        ex.Message,
+                        ex.GetType().ToString(),
+                        ex.StackTrace,
+                        ex.InnerException
+                    )
+                );
+            }
+        }
+
+        /// <summary>
         /// Retorna el registro completo de una persona realizando la búsqueda mediante su Id.
         /// </summary>
         /// <param name="id">(int) Numero de Id del registro</param>
@@ -28,7 +56,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                var person = await _repository.GetPersonById(id);
+                var person = await _repository.GetPersonByIdAsync(id);
 
                 return Ok(person);
             }
@@ -56,7 +84,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                var personLocation = await _repository.GetPersonBasicData(id);
+                var personLocation = await _repository.GetPersonBasicDataAsync(id);
 
                 return Ok(personLocation);
             }
@@ -84,7 +112,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                var personLocation = await _repository.GetPersonLocation(id);
+                var personLocation = await _repository.GetPersonLocationAsync(id);
 
                 return Ok(personLocation);
             }
@@ -112,7 +140,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                var personRegistered = await _repository.GetPersonRegistered(id);
+                var personRegistered = await _repository.GetPersonRegisteredAsync(id);
 
                 return Ok(personRegistered);
             }
@@ -140,7 +168,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                var personLogin = await _repository.GetPersonRegistered(id);
+                var personLogin = await _repository.GetPersonRegisteredAsync(id);
 
                 return Ok(personLogin);
             }
@@ -168,7 +196,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                var personPicture = await _repository.GetPersonPicture(id);
+                var personPicture = await _repository.GetPersonPictureAsync(id);
 
                 return Ok(personPicture);
             }
@@ -198,7 +226,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                var id = await _repository.AddPerson(person);
+                var id = await _repository.AddPersonAsync(person);
 
                 return Ok(
                     $"El registro fue añadido correctamente a la base de datos y se le asigno el id nro: {id}."
@@ -230,7 +258,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                var id = await _repository.UpdatePerson(person);
+                var id = await _repository.UpdatePersonAsync(person);
 
                 return Ok($"El registro con 'id: {id}' fue actualizado correctamente.");
             }
@@ -258,7 +286,7 @@ namespace Person.API.Controllers
         {
             try
             {
-                await _repository.DeletePerson(id);
+                await _repository.DeletePersonAsync(id);
 
                 return Ok(
                     new ResponseSuccess(

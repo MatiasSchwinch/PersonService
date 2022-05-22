@@ -1,18 +1,20 @@
 ﻿using Person.Domain.PersonAggregate.DTO;
 using Person.Domain.SeedWork;
+using System.Linq.Expressions;
 
 namespace Person.Domain.PersonAggregate
 {
     public interface IPersonRepository : IRepository<PersonEntity>
     {
-        Task<PersonEntityDto> GetPersonById(int id);
-        Task<BasicDataDto> GetPersonBasicData(int personId);
-        Task<LocationDto> GetPersonLocation(int personId);
-        Task<RegisteredDto> GetPersonRegistered(int personId);
-        Task<LoginDto> GetPersonLogin(int personId);
-        Task<PictureDto> GetPersonPicture(int personId);
-        Task<int> AddPerson(PersonEntityDto personDto);
-        Task DeletePerson(int id);
-        Task<int> UpdatePerson(PersonEntityDto personDto);
+        Task<IEnumerable<PersonEntityDto>> GetAllAsync(Expression<Func<PersonEntity, bool>>? filter);
+        Task<PersonEntityDto> GetPersonByIdAsync(int id);
+        Task<BasicDataDto> GetPersonBasicDataAsync(int personId);
+        Task<LocationDto> GetPersonLocationAsync(int personId);
+        Task<RegisteredDto> GetPersonRegisteredAsync(int personId);
+        Task<LoginDto> GetPersonLoginAsync(int personId);
+        Task<PictureDto> GetPersonPictureAsync(int personId);
+        Task<int> AddPersonAsync(PersonEntityDto personDto);
+        Task DeletePersonAsync(int id);
+        Task<int> UpdatePersonAsync(PersonEntityDto personDto);
     }
 }
